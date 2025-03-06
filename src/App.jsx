@@ -42,7 +42,7 @@ function getPreparedGoods(goods, { sortField, reversed }) {
 }
 
 export const App = () => {
-  const [sortField, SetSortField] = useState(false);
+  const [sortField, setSortField] = useState('');
   const [reversed, setReversed] = useState(false);
   const visibleGoods = getPreparedGoods(goodsFromServer, {
     sortField,
@@ -55,7 +55,7 @@ export const App = () => {
         <button
           type="button"
           className={`button is-info ${sortField === SORT_ALPHABETICALLY ? '' : 'is-light'}`}
-          onClick={() => SetSortField(SORT_ALPHABETICALLY)}
+          onClick={() => setSortField(SORT_ALPHABETICALLY)}
         >
           Sort alphabetically
         </button>
@@ -63,7 +63,7 @@ export const App = () => {
         <button
           type="button"
           className={`button is-success ${sortField === SORT_LENGTH ? '' : 'is-light'}`}
-          onClick={() => SetSortField(SORT_LENGTH)}
+          onClick={() => setSortField(SORT_LENGTH)}
         >
           Sort by length
         </button>
@@ -81,7 +81,7 @@ export const App = () => {
             type="button"
             className="button is-danger is-light"
             onClick={() => {
-              SetSortField(false);
+              setSortField('');
               setReversed(false);
             }}
           >
