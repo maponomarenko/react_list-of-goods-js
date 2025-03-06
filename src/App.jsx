@@ -15,76 +15,39 @@ export const goodsFromServer = [
   'Garlic',
 ];
 
-const List = ({ goods }) => {
-  return (
-    <ul>
-      {goods.map(good => (
-        <ListItem good={good} key={good} />
-      ))}
-    </ul>
-  );
-};
+const SORT_ALPHABETICALLY = 'alph';
+const SORT_LENGTH = 'length';
 
-const ListItem = ({ good }) => {
-  return <li data-cy="Good">{good}</li>;
-};
+function getPreparedGoods(goods, { sortField, reversed }) {
+  const preparedGoods = [...goods];
+
+  if (sortField) {
+    preparedGoods.sort((good1, good2) => {
+      switch (sortField) {
+        case SORT_ALPHABETICALLY:
+          return good1.localeCompare(good2);
+        case SORT_LENGTH:
+          return good1.length - good2.length;
+        default:
+          return 0;
+      }
+    });
+  }
+
+  if (reversed) {
+    preparedGoods.reverse();
+  }
+
+  return preparedGoods;
+}
 
 export const App = () => {
-  const [goods, SetGoods] = useState(goodsFromServer);
-  const [sortField, SetSortField] = useState('');
-  const [reversed, SetReversed] = useState('');
-  const [reverseCount, setReverseCount] = useState(0);
-
-  const SORT_ALPHABETICALLY = 'alph';
-  const SORT_LENGTH = 'length';
-  const REVERSE = 'reversed';
-
-  const sortAlphabetically = () => {
-    SetGoods(
-      [...goodsFromServer].sort((good1, good2) => good1.localeCompare(good2)),
-    );
-    SetSortField(SORT_ALPHABETICALLY);
-
-    if (reversed === REVERSE) {
-      SetGoods(
-        [...goodsFromServer]
-          .sort((good1, good2) => good1.localeCompare(good2))
-          .reverse(),
-      );
-    }
-  };
-
-  const sortByLength = () => {
-    SetGoods(
-      [...goodsFromServer].sort((good1, good2) => good1.length - good2.length),
-    );
-
-    SetSortField(SORT_LENGTH);
-
-    if (reversed === REVERSE) {
-      SetGoods(
-        [...goodsFromServer]
-          .sort((good1, good2) => good1.length - good2.length)
-          .reverse(),
-      );
-    }
-  };
-
-  const reverse = () => {
-    SetGoods([...goods].reverse());
-    SetReversed(REVERSE);
-    setReverseCount(reverseCount + 1);
-
-    if (reverseCount % 2 !== 0) {
-      SetReversed('');
-    }
-  };
-
-  const reset = () => {
-    SetGoods(goodsFromServer);
-    SetSortField('');
-    SetReversed('');
-  };
+  const [sortField, SetSortField] = useState(false);
+  const [reversed, setReversed] = useState(false);
+  const visibleGoods = getPreparedGoods(goodsFromServer, {
+    sortField,
+    reversed,
+  });
 
   return (
     <div className="section content">
@@ -92,7 +55,7 @@ export const App = () => {
         <button
           type="button"
           className={`button is-info ${sortField === SORT_ALPHABETICALLY ? '' : 'is-light'}`}
-          onClick={sortAlphabetically}
+          onClick={() => SetSortField(SORT_ALPHABETICALLY)}
         >
           Sort alphabetically
         </button>
@@ -100,24 +63,27 @@ export const App = () => {
         <button
           type="button"
           className={`button is-success ${sortField === SORT_LENGTH ? '' : 'is-light'}`}
-          onClick={sortByLength}
+          onClick={() => SetSortField(SORT_LENGTH)}
         >
           Sort by length
         </button>
 
         <button
           type="button"
-          className={`button is-warning ${reversed === REVERSE ? '' : 'is-light'}`}
-          onClick={reverse}
+          className={`button is-warning ${reversed ? '' : 'is-light'}`}
+          onClick={() => setReversed(!reversed)}
         >
           Reverse
         </button>
 
-        {sortField !== '' || reversed !== '' ? (
+        {sortField || reversed ? (
           <button
             type="button"
             className="button is-danger is-light"
-            onClick={reset}
+            onClick={() => {
+              SetSortField(false);
+              setReversed(false);
+            }}
           >
             Reset
           </button>
@@ -125,7 +91,11 @@ export const App = () => {
       </div>
 
       <ul>
-        <List goods={goods} />
+        {visibleGoods.map(good => (
+          <li data-cy="Good" key={good}>
+            {good}
+          </li>
+        ))}
       </ul>
     </div>
   );
